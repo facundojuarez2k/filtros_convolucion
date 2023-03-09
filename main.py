@@ -2,7 +2,6 @@ import numpy as np
 from numpy import ndarray
 import cv2
 from cv2 import Mat
-import argparse
 
 
 def main():
@@ -10,7 +9,7 @@ def main():
     image = cv2.imread('./source.jpg')
     image_gray_scale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    small_blur = np.ones(shape=(7,7), dtype="float") * (1.0 / (7 * 7))
+    small_blur = np.ones(shape=(7, 7), dtype="float") * (1.0 / (7 * 7))
 
     # Aplicar el filtro
     result_image = convolve(image, small_blur)
@@ -59,7 +58,7 @@ def convolve(image: Mat, kernel: ndarray) -> Mat:
             output[y, x] = k
 
     normalized_image = cv2.normalize(output,  output, 0, 255, cv2.NORM_MINMAX)
-    
+
     return normalized_image
 
 

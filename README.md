@@ -32,4 +32,4 @@ e.g: `python main.py /home/user/imagen.png small_blur`
 
 ## Creditos
 - Adrian Rosebrock: https://pyimagesearch.com/2016/07/25/convolutions-with-opencv-and-python/
-- Cris Luengo: https://stackoverflow.com/questions/54877892/convolving-image-with-kernel-in-fourier-domain
+- Cris Luengo: https://stackoverflow.com/a/54977551

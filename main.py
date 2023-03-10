@@ -2,7 +2,8 @@ import sys
 from skimage.exposure import rescale_intensity
 import numpy as np
 import cv2
-import filters
+import kernels
+from scipy import fftpack
 
 
 def main():
@@ -13,7 +14,7 @@ def main():
         sys.exit("Imagen no válida")
 
     # Aplicar el filtro
-    filtered_image = convolve(image, filters.identity)
+    filtered_image = convolve_fft(image, kernels.large_blur)
 
     render_image(filtered_image)
 
@@ -27,7 +28,44 @@ def render_image(image):
     cv2.destroyAllWindows()
 
 
+def convolve_fft(image, kernel):
+    '''
+        Calcula la convolución image * kernel usando el algoritmo FFT
+    '''
+    (image_height, image_width) = image.shape[:2]
+    (kernel_height, kernel_width) = kernel.shape[:2]
+
+    size = (image_height - kernel_height, image_width - kernel_width)
+
+    # Agregar padding al kernel
+    kernel_padded = np.pad(
+        kernel, (((size[0]+1)//2, size[0]//2), ((size[1]+1)//2, size[1]//2)), 'constant')
+
+    # Shifting de la frecuencia cero al centro del espectro
+    kernel_padded = fftpack.ifftshift(kernel_padded)
+
+    # Separar canales de la imagen
+    channels = cv2.split(image)
+    filtered_channels = []
+
+    # Aplicar el filtro a cada canal independiente de la imagen
+    for c in channels:
+        # Aplicar convolución en el dominio frecuencial
+        filtered_c = np.real(fftpack.ifft2(
+            fftpack.fft2(c) * fftpack.fft2(kernel_padded)))
+        filtered_channels.append(filtered_c)
+
+    # Unir los canales con el filtro aplicado
+    output = cv2.merge(filtered_channels)
+    output = output.astype("uint8")
+
+    return output
+
+
 def convolve(image, kernel):
+    '''
+        Calcula la convolución image * kernel en el dominio espacial
+    '''
     # Obtener las dimensiones de la imagen y del kernel
     (image_height, image_width) = image.shape[:2]
     (kernel_height, kernel_width) = kernel.shape[:2]
@@ -65,6 +103,7 @@ def convolve(image, kernel):
 
                 output[y-v_pad, x-h_pad][channel_index] = k
 
+    # Normalizar pixeles
     output = rescale_intensity(output, in_range=(0, 255))
     output = (output * 255).astype("uint8")
 

@@ -5,18 +5,18 @@ Aplica el filtro especificado a la imagen utilizando la operación convolución 
 ## Requisitos
 
 -   [Python3](https://www.python.org/downloads/)
--   OpenCV4
--   Scipy
 
 ## Instalar módulos
 
-cd convolucion-python
+cd filtros_convolucion
+
 python -m pip install -r requirements.txt
 
 ## Uso
 
-python main.py RUTA_IMAGEN FILTRO
-e.g: python main.py /home/user/imagen.png small_blur
+**python main.py <RUTA_IMAGEN> <FILTRO>**
+
+e.g: `python main.py /home/user/imagen.png small_blur`
 
 ### Filtros disponibles
 

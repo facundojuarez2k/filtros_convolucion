@@ -32,7 +32,7 @@ def main():
         sys.exit("Filtro inexistente")
 
     # Aplicar el filtro
-    filtered_image = convolve(image, filter['kernel'], filter['grayscale'])
+    filtered_image = convolve_fft(image, filter['kernel'], filter['grayscale'])
 
     render_image(filtered_image)
 

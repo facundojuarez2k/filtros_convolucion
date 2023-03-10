@@ -1,20 +1,38 @@
+'''
+    Credits to:
+      - Adrian Rosebrock: https://pyimagesearch.com/2016/07/25/convolutions-with-opencv-and-python/
+      - Cris Luengo: https://stackoverflow.com/questions/54877892/convolving-image-with-kernel-in-fourier-domain
+'''
+
 import sys
+import os
 from skimage.exposure import rescale_intensity
 import numpy as np
 import cv2
-import kernels
+from filters import filters
+import argparse
 from scipy import fftpack
 
 
 def main():
-    # Cargar imagen original
-    image = cv2.imread('./source.jpg')
+    # Leer entrada del programa
+    (image_path, filter_name) = parse_args()
 
+    if not os.path.exists(image_path):
+        sys.exit("Ruta de imagen inválida")
+
+    # Cargar imagen
+    image = cv2.imread(image_path)
     if image is None or image.size == 0:
         sys.exit("Imagen no válida")
 
+    # Cargar filtro
+    filter = filters.get(filter_name, None)
+    if filter is None:
+        sys.exit("Filtro inexistente")
+
     # Aplicar el filtro
-    filtered_image = convolve_fft(image, kernels.large_blur)
+    filtered_image = convolve(image, filter['kernel'], filter['grayscale'])
 
     render_image(filtered_image)
 
@@ -22,16 +40,22 @@ def main():
 
 
 def render_image(image):
-    cv2.namedWindow("original_image", cv2.WINDOW_KEEPRATIO)
-    cv2.imshow("original_image", image)
+    '''
+        Mostrar la imagen en una ventana
+    '''
+    cv2.namedWindow("image", cv2.WINDOW_KEEPRATIO)
+    cv2.imshow("image", image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 
-def convolve_fft(image, kernel):
+def convolve_fft(image, kernel, grayscale=False):
     '''
         Calcula la convolución image * kernel usando el algoritmo FFT
     '''
+    if grayscale:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
     (image_height, image_width) = image.shape[:2]
     (kernel_height, kernel_width) = kernel.shape[:2]
 
@@ -53,6 +77,10 @@ def convolve_fft(image, kernel):
         # Aplicar convolución en el dominio frecuencial
         filtered_c = np.real(fftpack.ifft2(
             fftpack.fft2(c) * fftpack.fft2(kernel_padded)))
+
+        # Normalizar pixels
+        filtered_c = rescale_intensity(filtered_c, in_range=(0, 255))
+        filtered_c = filtered_c * 255
         filtered_channels.append(filtered_c)
 
     # Unir los canales con el filtro aplicado
@@ -62,10 +90,13 @@ def convolve_fft(image, kernel):
     return output
 
 
-def convolve(image, kernel):
+def convolve(image, kernel, grayscale=False):
     '''
         Calcula la convolución image * kernel en el dominio espacial
     '''
+    if grayscale:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
     # Obtener las dimensiones de la imagen y del kernel
     (image_height, image_width) = image.shape[:2]
     (kernel_height, kernel_width) = kernel.shape[:2]
@@ -79,35 +110,57 @@ def convolve(image, kernel):
     image = cv2.copyMakeBorder(src=image, top=v_pad, bottom=v_pad,
                                left=h_pad, right=h_pad, borderType=cv2.BORDER_REPLICATE)
 
-    # Crear matriz nula
-    output = np.zeros((image_height, image_width, channels))
+    # Separar canales de la imagen
+    channels = cv2.split(image)
+    filtered_channels = []
 
-   # Recorrer la imagen de izquierda a derecha y desde arriba hacia abajo aplicando el kernel a cada pixel
-    for y in np.arange(v_pad, image_height + v_pad):
-        for x in np.arange(h_pad, image_width + h_pad):
-            # Obtener la región de la imagen sobre la cual se aplicara la convolución
-            y_start = (y - v_pad)
-            y_end = (y + v_pad + 1)
-            x_start = (x - h_pad)
-            x_end = (x + h_pad + 1)
+    # Recorrer la imagen de izquierda a derecha y desde arriba hacia abajo aplicando el kernel a cada pixel
+    for chnl in channels:
+        # Crear matriz nula
+        filtered_c = np.zeros((image_height, image_width))
 
-            roi = image[y_start:y_end, x_start:x_end]
+        for y in np.arange(v_pad, image_height + v_pad):
+            for x in np.arange(h_pad, image_width + h_pad):
+                # Obtener la región de la imagen sobre la cual se aplicara la convolución
+                y_start = (y - v_pad)
+                y_end = (y + v_pad + 1)
+                x_start = (x - h_pad)
+                x_end = (x + h_pad + 1)
 
-            # Aplicar la convolución a cada canal
-            for channel_index in range(channels):
-                # Obtener el canal (r, g, b)
-                channel_values = roi[:, :, channel_index]
+                roi = chnl[y_start:y_end, x_start:x_end]
 
                 # Aplicar la convolución
-                k = (channel_values * kernel).sum()
+                filtered_c[y-v_pad, x-h_pad] = (roi * kernel).sum()
 
-                output[y-v_pad, x-h_pad][channel_index] = k
+        # Normalizar pixels
+        filtered_c = rescale_intensity(filtered_c, in_range=(0, 255))
+        filtered_c = filtered_c * 255
+        filtered_channels.append(filtered_c)
 
-    # Normalizar pixeles
-    output = rescale_intensity(output, in_range=(0, 255))
-    output = (output * 255).astype("uint8")
+    output = cv2.merge(filtered_channels)
+    output = output.astype("uint8")
 
     return output
+
+
+def parse_args():
+    filter_options = 'Filtros disponibles: \n'
+
+    for k, v in filters.items():
+        filter_options += f' {k}: {v["description"]} \n'
+
+    parser = argparse.ArgumentParser(
+        description="Aplica el filtro especificado a la imagen",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=f'{filter_options}')
+    parser.add_argument("image_path", metavar="image",
+                        type=str, help="Ruta a la imagen")
+    parser.add_argument("filter_name", metavar="filter",
+                        type=str, help="Nombre del filtro a aplicar")
+
+    args = parser.parse_args()
+
+    return (args.image_path, args.filter_name)
 
 
 if __name__ == '__main__':

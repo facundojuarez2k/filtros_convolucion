@@ -20,15 +20,16 @@ e.g: `python main.py /home/user/imagen.png small_blur`
 
 ### Filtros disponibles
 
-| Nombre     | Descripción             |
-| ---------- | ----------------------- |
-| identity   | Filtro identidad        |
-| sharpen    | Realza los bordes       |
-| small_blur | Blur gaussiano leve     |
-| large_blur | Blur gaussiano grande   |
-| laplacian  | Filtro laplaciano       |
-| sobel_x    | Filtro sobel horizontal |
-| sobel_x    | Filtro sobel vertical   |
+| Nombre          | Descripción             |
+| ----------------| ----------------------- |
+| identity        | Filtro identidad        |
+| sharpen         | Realza los bordes       |
+| small_blur      | Blur gaussiano leve     |
+| large_blur      | Blur gaussiano grande   |
+| laplacian       | Filtro laplaciano       |
+| sobel_x         | Filtro sobel horizontal |
+| sobel_x         | Filtro sobel vertical   |
+| shift_substract | Shift-substract         |
 
 ## Creditos
 - Adrian Rosebrock: https://pyimagesearch.com/2016/07/25/convolutions-with-opencv-and-python/

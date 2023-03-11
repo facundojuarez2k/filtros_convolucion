@@ -34,6 +34,11 @@ sobel_y = np.array((
     [0, 0, 0],
     [1, 2, 1]), dtype="int")
 
+shift_substract = np.array((
+    [0, 0, 0],
+    [0, 1, 0],
+    [0, 0, -1]), dtype="int")
+
 filters = {
     "identity": {
         "description": "Filtro identidad",
@@ -68,6 +73,11 @@ filters = {
     "sobel_y": {
         "description": "Filtro sobel vertical",
         "kernel": sobel_y,
+        "grayscale": True
+    },
+    "shift_substract": {
+        "description": "Shift and substract",
+        "kernel": shift_substract,
         "grayscale": True
     }
 }

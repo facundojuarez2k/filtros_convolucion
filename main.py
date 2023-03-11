@@ -50,6 +50,10 @@ def convolve_fft(image, kernel, grayscale=False):
     if grayscale:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
+    # Invertir matriz sobre eje x y sobre eje y
+    kernel = np.flip(kernel, axis=0)
+    kernel = np.flip(kernel, axis=1)
+
     (image_height, image_width) = image.shape[:2]
     (kernel_height, kernel_width) = kernel.shape[:2]
 
@@ -90,6 +94,10 @@ def convolve(image, kernel, grayscale=False):
     '''
     if grayscale:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Invertir matriz sobre eje x y sobre eje y
+    kernel = np.flip(kernel, axis=0)
+    kernel = np.flip(kernel, axis=1)
 
     # Obtener las dimensiones de la imagen y del kernel
     (image_height, image_width) = image.shape[:2]

@@ -10,7 +10,7 @@ from scipy import fftpack
 
 def main():
     # Leer entrada del programa
-    (image_path, filter_name) = parse_args()
+    (image_path, filter_name, no_fft) = parse_args()
 
     if not os.path.exists(image_path):
         sys.exit("Ruta de imagen inválida")
@@ -26,7 +26,10 @@ def main():
         sys.exit("Filtro inexistente")
 
     # Aplicar el filtro
-    filtered_image = convolve_fft(image, filter['kernel'], filter['grayscale'])
+    if no_fft:
+        filtered_image = convolve(image, filter['kernel'], filter['grayscale'])
+    else:
+        filtered_image = convolve_fft(image, filter['kernel'], filter['grayscale'])
 
     render_image(filtered_image)
 
@@ -159,10 +162,11 @@ def parse_args():
                         type=str, help="Ruta a la imagen")
     parser.add_argument("filter_name", metavar="filter",
                         type=str, help="Nombre del filtro a aplicar")
+    parser.add_argument('--no-fft', action='store_true', help="Ejecuta la convolución de forma directa")
 
     args = parser.parse_args()
 
-    return (args.image_path, args.filter_name)
+    return (args.image_path, args.filter_name, args.no_fft)
 
 
 if __name__ == '__main__':

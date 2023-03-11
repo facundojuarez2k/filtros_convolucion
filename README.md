@@ -20,8 +20,10 @@ e.g: `python main.py /home/user/imagen.png small_blur`
 
 ### Parámetros adicionales:
 
-*-h* Muestra la ayuda
-*--no-fft* Ejecuta la convolución de forma directa
+|                 | Descripción             |
+| ----------------| ----------------------- |
+| -h        | Muestra la ayuda        |
+| --no-fft         | Ejecuta la convolución de forma directa       |
 
 ### Filtros disponibles
 

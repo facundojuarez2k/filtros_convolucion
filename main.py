@@ -29,7 +29,8 @@ def main():
     if no_fft:
         filtered_image = convolve(image, filter['kernel'], filter['grayscale'])
     else:
-        filtered_image = convolve_fft(image, filter['kernel'], filter['grayscale'])
+        filtered_image = convolve_fft(
+            image, filter['kernel'], filter['grayscale'])
 
     render_image(filtered_image)
 
@@ -162,7 +163,8 @@ def parse_args():
                         type=str, help="Ruta a la imagen")
     parser.add_argument("filter_name", metavar="filter",
                         type=str, help="Nombre del filtro a aplicar")
-    parser.add_argument('--no-fft', action='store_true', help="Ejecuta la convolución de forma directa")
+    parser.add_argument('--no-fft', action='store_true',
+                        help="Ejecuta la convolución de forma directa")
 
     args = parser.parse_args()
 

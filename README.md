@@ -38,6 +38,6 @@ e.g: `python main.py /home/user/imagen.png small_blur`
 | sobel_x         | Filtro sobel vertical   |
 | shift_substract | Shift-substract         |
 
-## Creditos
+## Créditos
 - Adrian Rosebrock: https://pyimagesearch.com/2016/07/25/convolutions-with-opencv-and-python/
 - Cris Luengo: https://stackoverflow.com/a/54977551

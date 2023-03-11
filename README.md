@@ -14,7 +14,7 @@ python -m pip install -r requirements.txt
 
 ## Uso
 
-**python main.py <RUTA_IMAGEN> <FILTRO>**
+**python main.py [RUTA_IMAGEN] [FILTRO]**
 
 e.g: `python main.py /home/user/imagen.png small_blur`
 
